@@ -2,6 +2,8 @@ import { TOOL_DEFINITIONS, executeTool } from "@/lib/tools";
 
 const DEEPSEEK_API = "https://api.deepseek.com/v1/chat/completions";
 const MAX_STEPS = 5;
+const STEP_TIMEOUT_MS = 30000;  // 单步超时 30 秒
+const MAX_TOKENS = 8000;        // 总 Token 上限
 
 type DeepSeekMessage = {
   role: "system" | "user" | "assistant" | "tool";
@@ -34,6 +36,7 @@ export async function POST(req: Request) {
 
   // ─── Agent Loop ───
   let step = 0;
+  let totalTokens = 0;
 
   while (step < MAX_STEPS) {
     step++;
@@ -50,6 +53,7 @@ export async function POST(req: Request) {
         tools: TOOL_DEFINITIONS,
         temperature: 0.3,
       }),
+      signal: AbortSignal.timeout(STEP_TIMEOUT_MS),  // ← 超时控制
     });
 
     const data = await response.json();
@@ -57,6 +61,15 @@ export async function POST(req: Request) {
 
     if (!assistantMsg) {
       return Response.json({ error: "AI 无响应" }, { status: 500 });
+    }
+
+    // Token 消耗监控
+    totalTokens += data.usage?.total_tokens ?? 0;
+    if (totalTokens > MAX_TOKENS) {
+      return Response.json(
+        { error: `Token 消耗已达上限 (${totalTokens}/${MAX_TOKENS})，已终止` },
+        { status: 500 }
+      );
     }
 
     // 有 tool_calls？执行工具然后继续循环
