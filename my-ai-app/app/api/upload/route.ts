@@ -1,7 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { execSync } from "child_process";
-import { writeFileSync, unlinkSync } from "fs";
-import { join } from "path";
+import * as pdfjs from "pdfjs-dist";
 
 const EMBEDDING_API = "https://api.siliconflow.cn/v1/embeddings";
 const EMBEDDING_MODEL = "BAAI/bge-large-zh-v1.5";
@@ -23,6 +21,23 @@ function splitText(text: string, size: number): string[] {
   return chunks;
 }
 
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  const data = new Uint8Array(buffer);
+  const doc = await pdfjs.getDocument({ data }).promise;
+
+  const texts: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item) => ("str" in item ? item.str : ""))
+      .join(" ");
+    texts.push(pageText);
+  }
+
+  return texts.join("\n").trim();
+}
+
 export async function POST(req: Request) {
   const formData = await req.formData();
   const file = formData.get("file") as File;
@@ -31,24 +46,17 @@ export async function POST(req: Request) {
     return Response.json({ error: "请上传 PDF 文件" }, { status: 400 });
   }
 
-  // 1. 用 Python 提取 PDF 文字
+  // 1. 用 pdfjs-dist 提取 PDF 文字（纯 JS，无需 Python）
   const buffer = Buffer.from(await file.arrayBuffer());
-  const tmpPath = join(process.cwd(), "temp_upload.pdf");
-  writeFileSync(tmpPath, buffer);
 
   let fullText: string;
   try {
-    fullText = execSync(`python lib/extract_pdf.py "${tmpPath}"`, {
-      encoding: "utf-8",
-      timeout: 30000,
-    });
+    fullText = await extractPdfText(buffer);
   } catch {
-    unlinkSync(tmpPath);
     return Response.json({ error: "PDF 解析失败" }, { status: 500 });
   }
-  unlinkSync(tmpPath);
 
-  if (!fullText.trim()) {
+  if (!fullText) {
     return Response.json({ error: "PDF 中没有可提取的文字" }, { status: 400 });
   }
 
