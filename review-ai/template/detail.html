@@ -1,0 +1,32 @@
+{{template "base.html" .}}
+
+{{define "content"}}
+<h1>审查详情</h1>
+
+<div class="review-meta">
+  <p><strong>仓库：</strong>{{.Review.RepoFullName}}</p>
+  <p><strong>PR：</strong>#{{.Review.PRNumber}} — {{.Review.PRTitle}}</p>
+  <p><strong>时间：</strong>{{.Review.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
+  <p><strong>状态：</strong><span class="badge badge-{{.Review.Status}}">{{.Review.Status}}</span></p>
+</div>
+
+{{if .Comments}}
+  {{range .Comments}}
+  <div class="comment comment-{{.Severity}}">
+    <div class="comment-header">
+      <span class="tag tag-{{.Severity}}">{{.Severity}}</span>
+      <span class="tag tag-{{.Category}}">{{.Category}}</span>
+      <span class="file">{{.FilePath}}{{if .LineNumber}}:{{.LineNumber}}{{end}}</span>
+    </div>
+    <p class="comment-body">{{.Body}}</p>
+    {{if .Suggestion}}
+    <pre class="suggestion"><code>{{.Suggestion}}</code></pre>
+    {{end}}
+  </div>
+  {{end}}
+{{else}}
+<p class="empty">审查意见加载中...</p>
+{{end}}
+
+<a href="/dashboard">← 返回历史</a>
+{{end}}

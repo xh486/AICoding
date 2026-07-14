@@ -1,0 +1,16 @@
+{{template "base.html" .}}
+
+{{define "content"}}
+<div class="hero">
+  <h1>🤖 Code Review AI</h1>
+  <p>GitHub PR 自动审查 · 安全 / Bug / 性能 / 风格</p>
+
+  {{if .User}}
+    <p>✅ 已登录：<strong>{{.User.GitHubLogin}}</strong></p>
+    <a href="/dashboard" class="btn">📊 审查历史</a>
+  {{else}}
+    <a href="/api/auth/login" class="btn">🔑 使用 GitHub 登录</a>
+    <p class="hint">登录后，在仓库设置 Webhook 即可自动审查 PR</p>
+  {{end}}
+</div>
+{{end}}

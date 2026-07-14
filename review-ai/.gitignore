@@ -1,0 +1,10 @@
+# Binaries
+review-ai.exe
+*.exe
+
+# Environment
+.env.local
+
+# IDE
+.vscode/
+.idea/

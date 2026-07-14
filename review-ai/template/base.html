@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+  <title>Code Review AI</title>
+</head>
+<body>
+  <nav>
+    <a href="/">🏠 Code Review AI</a>
+    <span>
+      {{if .User}}
+        <img src="{{.User.AvatarURL}}" width="24" height="24" style="border-radius:50%;vertical-align:middle">
+        {{.User.GitHubLogin}}
+        <a href="/dashboard">📊 Dashboard</a>
+      {{else}}
+        <a href="/api/auth/login">🔑 GitHub 登录</a>
+      {{end}}
+    </span>
+  </nav>
+  <main>{{block "content" .}}{{end}}</main>
+  <footer>Code Review AI · Powered by DeepSeek</footer>
+</body>
+</html>
