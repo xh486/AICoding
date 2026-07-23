@@ -8,8 +8,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +20,30 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ─── Dot animation ─── */
+@keyframes dotPulse {
+  0%, 100% { opacity: 0; transform: translateY(0); }
+  33% { opacity: 1; transform: translateY(-4px); }
+  66% { opacity: 1; transform: translateY(0); }
+}
+.animate-dot1 { animation: dotPulse 1.2s infinite 0ms; }
+.animate-dot2 { animation: dotPulse 1.2s infinite 200ms; }
+.animate-dot3 { animation: dotPulse 1.2s infinite 400ms; }
+
+/* ─── Slide up ─── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.animate-slideUp { animation: slideUp 0.3s ease-out; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
